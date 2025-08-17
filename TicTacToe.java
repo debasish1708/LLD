@@ -1,101 +1,153 @@
 import java.util.Arrays;
 import java.util.Scanner;
 
-class TicTacToe{
-    public int[][] board;
-    public static TicTacToe game;
-
-    public TicTacToe() {
-        game = this;
-        System.out.println("Initializing Tic Tac Toe board...");
-        board = new int[3][3];
-        for(int[] i:board){
-            Arrays.fill(i,-1);
+public class TicTacToe {
+    public static int count=1;
+    public static int n;
+    public static char[][] board;
+    public static Player[] players;
+    static class Player{
+        int id;
+        char symbol;
+        String name;
+        int[] countRow;
+        int[] countCol;
+        int countDiagonal;
+        int countAntiDiagonal;
+        public Player(String name) {
+            this.id=count++;
+            if(this.id==1){
+                this.symbol='X';
+            } else {
+                this.symbol='O';
+            }
+            this.name=name;
+            this.countRow=new int[n];
+            this.countCol=new int[n];
+            this.countDiagonal=0;
+            this.countAntiDiagonal=0;
         }
-        game.startGame();
+        public static Player getPlayer(int id){
+            return players[id];
+        }
+        public static Player getBySymbol(char symbol){
+            for(Player player : players){
+                if(player.symbol == symbol) {
+                    return player;
+                }
+            }
+            return null;
+        }
+        public String toString(){
+            return "Player{" +
+                    "id=" + this.id +
+                    ", name='" + this.name + '\'' +
+                    '}';
+        }
     }
-    public void printBoard() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+    public TicTacToe(Scanner scanner) {
+        try {
+            System.out.print("Enter board size (n x n): ");
+            n = scanner.nextInt();
+            board = new char[n][n];
+            players = new Player[2];
+            scanner.nextLine(); // consume leftover newline
+            for(int i=0;i<2;i++){
+                System.out.print("Enter Player " + (i + 1) + " Name:");
+                String playerName = scanner.nextLine();
+                players[i] = new Player(playerName);
+            }
+            resetBoard();
+            printBoard();
+        } catch(Exception e) {
+           System.out.println(e.getMessage());
+        }
+    }
+
+    public static void resetBoard(){
+        for(char[] i:board){
+            Arrays.fill(i, '_');
+        }
+    }
+    public static void printBoard(){
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
                 System.out.print(board[i][j] + " ");
             }
             System.out.println();
         }
     }
-    public void startGame(){
-        System.out.println("Starting a new game...");
+
+    public static boolean isWin = false;
+    public static int totalCount=0;
+    public static boolean isValidMove = true;
+
+    // 1st makeMove in O(1) time
+    public static void makeMove(int player, int row, int col){
+        // validate row and col
+        if(row<0||row>=n||col<0||col>=n){
+            System.out.println("Out of bounds");
+            isValidMove = false;
+            return;
+        }
+        if(board[row][col]!='_'){
+            System.out.println("Cell already occupied by: " + Player.getBySymbol(board[row][col]).name);
+            isValidMove = false;
+            return;
+        }
+        Player currPlayer = Player.getPlayer(player);
+        // play the move
+        board[row][col]=currPlayer.symbol;
+        totalCount++;
+        isValidMove=true;
+
+        // update the player row, col, diagonal and anti-diagonal counts
+        currPlayer.countRow[row]++;
+        currPlayer.countCol[col]++;
+        if(row==col){
+            currPlayer.countDiagonal++;
+        }
+        if(row+col==n-1) {
+            currPlayer.countAntiDiagonal++;
+        }
+        if(currPlayer.countRow[row]==n||currPlayer.countCol[col]==n
+                ||currPlayer.countDiagonal==n||currPlayer.countAntiDiagonal==n){
+            System.out.println("Player " + currPlayer.name + " wins!");
+            isWin = true;
+            return;
+        }
+        if(totalCount==n*n){
+            System.out.println("Game is a draw!");
+            isWin=true;
+            return;
+        }
         printBoard();
-    }
-    public static int moveCount = 0;
-    public boolean makeMove(int player, int row, int col) {
-        if(row<0||col<0||row>2||col>2){
-            System.out.println("Invalid move. Try again.");
-            return false;
-        }
-        if (board[row][col] == -1) {
-            board[row][col] = player;
-            moveCount++;
-            return true;
-        } else {
-            System.out.println("Invalid move. Try again.");
-        }
-        return false;
-    }
-    public static boolean playGameUntilDrawOrWin(){
-        if(moveCount == 9){
-            System.out.println("It's a draw!");
-            return true;
-        }
-
-        // check rows and columns
-        for (int i = 0; i < 3; i++) {
-            if (game.board[i][0] != -1 && game.board[i][0] == game.board[i][1] && game.board[i][1] == game.board[i][2]) {
-                System.out.println("Player " + game.board[i][0] + " wins!");
-                return true;
-            }
-            if (game.board[0][i] != -1 && game.board[0][i] == game.board[1][i] && game.board[1][i] == game.board[2][i]) {
-                System.out.println("Player " + game.board[0][i] + " wins!");
-                return true;
-            }
-        }
-
-
-        // Check diagonals
-        if (game.board[1][1] != -1 &&
-            ((game.board[0][0] == game.board[1][1] && game.board[1][1] == game.board[2][2]) ||
-             (game.board[0][2] == game.board[1][1] && game.board[1][1] == game.board[2][0]))){
-                System.out.println("Player " + game.board[1][1] + " wins!");
-                return true;
-             }
-        return false;
-    }
-   
-    private static int[] getMoveInput(Scanner scanner, int player) {
-        System.out.print(player + " Enter row (0-2): ");
-        int row = scanner.nextInt();
-        System.out.print(player + " Enter col (0-2): ");
-        int col = scanner.nextInt();
-        return new int[]{row, col};
+        System.out.println();
     }
 
     public static void main(String[] args) {
-       new TicTacToe();
-       try{
         Scanner scanner = new Scanner(System.in);
-        boolean isX = true;
-        while(!playGameUntilDrawOrWin()){
-            int player = isX ? 1 : 2;
-            int[] move = getMoveInput(scanner, player);
-            while(!game.makeMove(player, move[0], move[1])){
-                move = getMoveInput(scanner, player);
+        new TicTacToe(scanner);
+
+        // start the game
+        try {
+            boolean isA = true;
+            while(!isWin){
+                int playerId = isA ? 0 : 1;
+                Player currentPlayer = Player.getPlayer(playerId);
+                System.out.print(currentPlayer.name + "'s turn. Enter Move (row col): ");
+                int row = scanner.nextInt();
+                int col = scanner.nextInt();
+                makeMove(playerId, row, col);
+                if(!isValidMove){
+                    continue;
+                }
+                isA = !isA;
             }
-            isX = !isX;
-            game.printBoard();
-            System.out.println();
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        } finally {
+            scanner.close();
         }
-        scanner.close();
-       }catch(Exception e){
-           System.out.println("Error occurred: " + e.getMessage());
-       }
     }
 }
