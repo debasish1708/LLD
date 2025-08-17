@@ -104,7 +104,7 @@ public class TicTacToeOptimize {
         }
         if(totalCount==n*n){
             System.out.println("Game is a draw!");
-            isWin=false;
+            isWin=true;
             return;
         }
         printBoard();
