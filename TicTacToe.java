@@ -90,12 +90,15 @@ public class TicTacToe {
             isValidMove = false;
             return;
         }
+        Player currPlayer = Player.getPlayer(player);
         if(board[row][col]!='_'){
-            System.out.println("Cell already occupied by: " + Player.getBySymbol(board[row][col]).name);
+            Player existPlayer = Player.getBySymbol(board[row][col]);
+            String name = existPlayer.id == currPlayer.id ? "You" : existPlayer.name;
+            System.out.println("Cell already occupied by: " + name);
             isValidMove = false;
             return;
         }
-        Player currPlayer = Player.getPlayer(player);
+        // Player currPlayer = Player.getPlayer(player);
         // play the move
         board[row][col]=currPlayer.symbol;
         totalCount++;
