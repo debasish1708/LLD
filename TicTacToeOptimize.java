@@ -77,7 +77,7 @@ public class TicTacToeOptimize {
             return;
         }
         if(board[row][col]!=-1){
-            System.out.println("Cell already occupied");
+            System.out.println("Cell already occupied by: " + Player.getPlayer(board[row][col]-1).name);
             isValidMove = false;
             return;
         }
