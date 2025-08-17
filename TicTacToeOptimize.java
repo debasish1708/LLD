@@ -4,10 +4,11 @@ import java.util.Scanner;
 public class TicTacToeOptimize {
     public static int count=1;
     public static int n;
-    public static int[][] board;
+    public static char[][] board;
     public static Player[] players;
     static class Player{
         int id;
+        char symbol;
         String name;
         int[] countRow;
         int[] countCol;
@@ -15,6 +16,11 @@ public class TicTacToeOptimize {
         int countAntiDiagonal;
         public Player(String name) {
             this.id=count++;
+            if(this.id==1){
+                this.symbol='X';
+            } else {
+                this.symbol='O';
+            }
             this.name=name;
             this.countRow=new int[n];
             this.countCol=new int[n];
@@ -23,6 +29,14 @@ public class TicTacToeOptimize {
         }
         public static Player getPlayer(int id){
             return players[id];
+        }
+        public static Player getBySymbol(char symbol){
+            for(Player player : players){
+                if(player.symbol == symbol) {
+                    return player;
+                }
+            }
+            return null;
         }
         public String toString(){
             return "Player{" +
@@ -35,7 +49,7 @@ public class TicTacToeOptimize {
         try {
             System.out.print("Enter board size (n x n): ");
             n = scanner.nextInt();
-            board = new int[n][n];
+            board = new char[n][n];
             players = new Player[2];
             scanner.nextLine(); // consume leftover newline
             for(int i=0;i<2;i++){
@@ -51,8 +65,8 @@ public class TicTacToeOptimize {
     }
 
     public static void resetBoard(){
-        for(int[] i:board){
-            Arrays.fill(i, -1);
+        for(char[] i:board){
+            Arrays.fill(i, '_');
         }
     }
     public static void printBoard(){
@@ -76,18 +90,18 @@ public class TicTacToeOptimize {
             isValidMove = false;
             return;
         }
-        if(board[row][col]!=-1){
-            System.out.println("Cell already occupied by: " + Player.getPlayer(board[row][col]-1).name);
+        if(board[row][col]!='_'){
+            System.out.println("Cell already occupied by: " + Player.getBySymbol(board[row][col]).name);
             isValidMove = false;
             return;
         }
+        Player currPlayer = Player.getPlayer(player);
         // play the move
-        board[row][col]=player+1;
+        board[row][col]=currPlayer.symbol;
         totalCount++;
         isValidMove=true;
 
         // update the player row, col, diagonal and anti-diagonal counts
-        Player currPlayer = Player.getPlayer(player);
         currPlayer.countRow[row]++;
         currPlayer.countCol[col]++;
         if(row==col){
